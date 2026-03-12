@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import "../styles/ProfileViews.css";
 
-const DEMO_BASE_URL = "https://github.com";
+const DEMO_BASE_URL = "https://github-profile-server-production.up.railway.app";
 const DEMO_USERNAME = "ErnestChainDev";
 
 type StatCardProps = {
