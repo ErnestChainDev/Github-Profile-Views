@@ -1000,3 +1000,118 @@ input {
   color: #d1d5db;
   text-transform: uppercase;
 }
+
+.pv-theme-switcher {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 18px 0 22px;
+}
+
+.pv-theme-btn {
+  min-height: 48px;
+  padding: 0 18px;
+  border: 3px solid #000;
+  background: #fff;
+  color: #000;
+  box-shadow: 6px 6px 0 #000;
+  font-size: 13px;
+  font-weight: 900;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: 0.16s ease;
+}
+
+.pv-theme-btn:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 8px 8px 0 #000;
+}
+
+.pv-theme-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 3px 3px 0 #000;
+}
+
+.pv-theme-btn.is-active {
+  background: #f4ce14;
+}
+
+.pv-preview-box--retro {
+  background: #f3f3f3;
+}
+
+.pv-preview-box--neon {
+  background: #0b0f1d;
+  border: 3px solid #000;
+  box-shadow: 8px 8px 0 #000;
+}
+
+.pv-preview-stage {
+  position: relative;
+  overflow: hidden;
+  margin-top: 14px;
+  padding: 28px 18px;
+  border-radius: 16px;
+}
+
+.pv-preview-box--retro .pv-preview-stage {
+  border: 2px solid #d1d5db;
+  background: linear-gradient(180deg, #ffffff 0%, #ededed 100%);
+}
+
+.pv-preview-box--neon .pv-preview-stage {
+  border: 2px solid #1f2937;
+  background:
+    radial-gradient(circle at center, rgba(0, 229, 255, 0.08), transparent 35%),
+    radial-gradient(circle at 70% 30%, rgba(255, 0, 229, 0.1), transparent 30%),
+    linear-gradient(180deg, #090d18 0%, #05070f 100%);
+}
+
+.pv-preview-stage__grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.12;
+  background-image:
+    linear-gradient(rgba(0, 229, 255, 0.18) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 0, 229, 0.14) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.pv-preview-box--retro .pv-preview-stage__grid {
+  opacity: 0.05;
+  background-image:
+    linear-gradient(rgba(0, 0, 0, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.08) 1px, transparent 1px);
+}
+
+.pv-preview-badge-image {
+  position: relative;
+  z-index: 1;
+  display: block;
+  margin: 0 auto;
+  max-width: 100%;
+  height: auto;
+}
+
+.pv-preview-box--neon .pv-preview-badge-image {
+  filter:
+    drop-shadow(0 0 8px rgba(0, 229, 255, 0.65))
+    drop-shadow(0 0 16px rgba(255, 0, 229, 0.5))
+    drop-shadow(0 0 24px rgba(255, 230, 0, 0.35));
+}
+
+.pv-preview-hint {
+  margin: 12px 0 0;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.pv-preview-box--neon .pv-preview-hint {
+  color: #d1d5db;
+}
+
+.pv-preview-box--retro .pv-preview-hint {
+  color: #374151;
+}

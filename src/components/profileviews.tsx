@@ -19,6 +19,8 @@ import "../styles/ProfileViews.css";
 const DEMO_BASE_URL = "https://github-profile-server-production.up.railway.app";
 const DEMO_USERNAME = "ErnestChainDev";
 
+type BadgeTheme = "retro" | "neon-line";
+
 type StatCardProps = {
   icon: LucideIcon;
   label: string;
@@ -82,23 +84,22 @@ export default function ProfileViews() {
   const [error, setError] = useState("");
   const [lastUpdated, setLastUpdated] = useState("");
   const [refreshKey, setRefreshKey] = useState(Date.now());
+  const [badgeTheme, setBadgeTheme] = useState<BadgeTheme>("retro");
 
   const endpoint = useMemo(
     () => `${DEMO_BASE_URL}/api/views/${activeUsername}`,
     [activeUsername]
   );
 
-  // Ito ang badge na gagamitin sa README at nagco-count
   const imageUrl = useMemo(
-    () => `${DEMO_BASE_URL}/api/badge/${activeUsername}?theme=neon`,
-    [activeUsername]
+    () => `${DEMO_BASE_URL}/api/badge/${activeUsername}?theme=${badgeTheme}`,
+    [activeUsername, badgeTheme]
   );
 
-  // Ito ang preview badge para sa UI lang at HINDI nagco-count
   const previewBadgeUrl = useMemo(
     () =>
-      `${DEMO_BASE_URL}/api/badge-preview/${activeUsername}?theme=neon&t=${refreshKey}`,
-    [activeUsername, refreshKey]
+      `${DEMO_BASE_URL}/api/badge-preview/${activeUsername}?theme=${badgeTheme}&t=${refreshKey}`,
+    [activeUsername, badgeTheme, refreshKey]
   );
 
   const markdown = useMemo(
@@ -260,6 +261,30 @@ export default function ProfileViews() {
               </div>
             </div>
 
+            <div className="pv-theme-switcher">
+              <button
+                type="button"
+                className={`pv-theme-btn ${badgeTheme === "retro" ? "is-active" : ""}`}
+                onClick={() => {
+                  setBadgeTheme("retro");
+                  setRefreshKey(Date.now());
+                }}
+              >
+                RETRO BADGE
+              </button>
+
+              <button
+                type="button"
+                className={`pv-theme-btn ${badgeTheme === "neon-line" ? "is-active" : ""}`}
+                onClick={() => {
+                  setBadgeTheme("neon-line");
+                  setRefreshKey(Date.now());
+                }}
+              >
+                NEON LINE BADGE
+              </button>
+            </div>
+
             <div className="pv-stats-grid" id="stats">
               <StatCard icon={Eye} label="TOTAL VIEWS" value={views ?? "--"} />
               <StatCard
@@ -287,7 +312,13 @@ export default function ProfileViews() {
                 <p className="pv-code">{markdown}</p>
               </div>
 
-              <div className="pv-preview-box pv-preview-box--neon">
+              <div
+                className={`pv-preview-box ${
+                  badgeTheme === "neon-line"
+                    ? "pv-preview-box--neon"
+                    : "pv-preview-box--retro"
+                }`}
+              >
                 <p className="pv-info-label">SAMPLE BADGE PREVIEW</p>
 
                 <div className="pv-preview-stage">
@@ -295,13 +326,13 @@ export default function ProfileViews() {
 
                   <img
                     src={previewBadgeUrl}
-                    alt={`${activeUsername} neon profile views badge`}
+                    alt={`${activeUsername} profile views badge`}
                     className="pv-preview-badge-image"
                   />
                 </div>
 
                 <p className="pv-preview-hint">
-                  Live neon preview from your animated SVG badge.
+                  Theme: {badgeTheme === "retro" ? "Retro Badge" : "Neon Line Badge"}
                 </p>
               </div>
 
@@ -330,7 +361,7 @@ export default function ProfileViews() {
               <p>1. YOUR README LOADS AN IMAGE FROM YOUR BADGE ENDPOINT.</p>
               <p>2. YOUR BACKEND TRACKS AND UPDATES THE VIEW COUNT.</p>
               <p>3. IT RETURNS AN SVG BADGE OR JSON RESPONSE.</p>
-              <p>4. YOU CAN STORE DATA IN SQLITE, POSTGRESQL, OR REDIS.</p>
+              <p>4. YOU CAN SWITCH BETWEEN RETRO AND NEON LINE STYLES.</p>
             </div>
           </div>
 
