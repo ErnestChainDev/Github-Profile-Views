@@ -75,20 +75,30 @@ function CopyButton({ text }: CopyButtonProps) {
 }
 
 export default function ProfileViews() {
-  const [username, setUsername] = useState(DEMO_USERNAME);
+  const [inputUsername, setInputUsername] = useState(DEMO_USERNAME);
+  const [activeUsername, setActiveUsername] = useState(DEMO_USERNAME);
   const [views, setViews] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [lastUpdated, setLastUpdated] = useState("");
+  const [refreshKey, setRefreshKey] = useState(Date.now());
 
   const endpoint = useMemo(
-    () => `${DEMO_BASE_URL}/api/views/${username}`,
-    [username]
+    () => `${DEMO_BASE_URL}/api/views/${activeUsername}`,
+    [activeUsername]
   );
 
+  // Ito ang badge na gagamitin sa README at nagco-count
   const imageUrl = useMemo(
-    () => `${DEMO_BASE_URL}/api/badge/${username}`,
-    [username]
+    () => `${DEMO_BASE_URL}/api/badge/${activeUsername}?theme=neon`,
+    [activeUsername]
+  );
+
+  // Ito ang preview badge para sa UI lang at HINDI nagco-count
+  const previewBadgeUrl = useMemo(
+    () =>
+      `${DEMO_BASE_URL}/api/badge-preview/${activeUsername}?theme=neon&t=${refreshKey}`,
+    [activeUsername, refreshKey]
   );
 
   const markdown = useMemo(
@@ -96,32 +106,48 @@ export default function ProfileViews() {
     [imageUrl]
   );
 
-  const fetchViews = async () => {
+  const fetchViews = async (usernameToFetch?: string) => {
+    const finalUsername = (usernameToFetch ?? inputUsername).trim();
+
+    if (!finalUsername) {
+      setError("Please enter a GitHub username.");
+      setViews(null);
+      setLastUpdated("");
+      return;
+    }
+
     setLoading(true);
     setError("");
 
     try {
-      const res = await fetch(endpoint);
+      const res = await fetch(`${DEMO_BASE_URL}/api/views/${finalUsername}`);
 
       if (!res.ok) {
         throw new Error("Failed to fetch profile views");
       }
 
       const data: ViewsResponse = await res.json();
+      const normalizedUsername = data.username ?? finalUsername;
+
       setViews(data.views ?? 0);
       setLastUpdated(data.updatedAt ?? new Date().toISOString());
+      setInputUsername(normalizedUsername);
+      setActiveUsername(normalizedUsername);
+      setRefreshKey(Date.now());
     } catch {
       setError("Could not load live count. Connect this page to your backend/API.");
       setViews(1284);
       setLastUpdated(new Date().toISOString());
+      setActiveUsername(finalUsername);
+      setRefreshKey(Date.now());
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchViews();
-  }, [endpoint]);
+    fetchViews(DEMO_USERNAME);
+  }, []);
 
   return (
     <div className="pv-page">
@@ -151,7 +177,11 @@ export default function ProfileViews() {
           </nav>
 
           <div className="pv-navbar__actions">
-            <button className="pv-btn pv-btn--primary" type="button" onClick={fetchViews}>
+            <button
+              className="pv-btn pv-btn--primary"
+              type="button"
+              onClick={() => fetchViews()}
+            >
               TRY IT NOW
             </button>
 
@@ -180,7 +210,11 @@ export default function ProfileViews() {
         </p>
 
         <div className="pv-hero-actions">
-          <button className="pv-btn pv-btn--primary pv-btn--hero" type="button" onClick={fetchViews}>
+          <button
+            className="pv-btn pv-btn--primary pv-btn--hero"
+            type="button"
+            onClick={() => fetchViews()}
+          >
             START BUILDING <ArrowRight size={18} />
           </button>
 
@@ -199,7 +233,11 @@ export default function ProfileViews() {
                 <h2 className="pv-section-title">Counter Dashboard</h2>
               </div>
 
-              <button className="pv-btn pv-btn--secondary" type="button" onClick={fetchViews}>
+              <button
+                className="pv-btn pv-btn--secondary"
+                type="button"
+                onClick={() => fetchViews()}
+              >
                 <RefreshCw size={16} className={loading ? "pv-spin" : ""} />
                 REFRESH
               </button>
@@ -209,10 +247,13 @@ export default function ProfileViews() {
               <div className="pv-input-wrap">
                 <Github size={16} className="pv-input-icon" />
                 <input
-                  value={username}
-                  onChange={(e) =>
-                    setUsername(e.target.value.trim() || DEMO_USERNAME)
-                  }
+                  value={inputUsername}
+                  onChange={(e) => setInputUsername(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      fetchViews();
+                    }
+                  }}
                   placeholder="GitHub username"
                   className="pv-input"
                 />
@@ -226,7 +267,7 @@ export default function ProfileViews() {
                 label="STATUS"
                 value={loading ? "LOADING..." : "LIVE"}
               />
-              <StatCard icon={Activity} label="USERNAME" value={username} />
+              <StatCard icon={Activity} label="USERNAME" value={activeUsername} />
             </div>
 
             <div className="pv-info-card">
@@ -246,12 +287,22 @@ export default function ProfileViews() {
                 <p className="pv-code">{markdown}</p>
               </div>
 
-              <div className="pv-preview-box">
+              <div className="pv-preview-box pv-preview-box--neon">
                 <p className="pv-info-label">SAMPLE BADGE PREVIEW</p>
-                <div className="pv-preview-badge">
-                  <Eye size={16} />
-                  {username} • {views ?? 0} VIEWS
+
+                <div className="pv-preview-stage">
+                  <div className="pv-preview-stage__grid" />
+
+                  <img
+                    src={previewBadgeUrl}
+                    alt={`${activeUsername} neon profile views badge`}
+                    className="pv-preview-badge-image"
+                  />
                 </div>
+
+                <p className="pv-preview-hint">
+                  Live neon preview from your animated SVG badge.
+                </p>
               </div>
 
               <div className="pv-footer-info">
@@ -294,6 +345,7 @@ export default function ProfileViews() {
             <div className="pv-route-list">
               <div className="pv-route-item">GET /api/views/:username</div>
               <div className="pv-route-item">GET /api/badge/:username</div>
+              <div className="pv-route-item">GET /api/badge-preview/:username</div>
               <div className="pv-route-item">GET /api/stats/top</div>
               <div className="pv-route-item">GET /api/profile/:username</div>
             </div>
